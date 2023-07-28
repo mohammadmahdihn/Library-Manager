@@ -7,7 +7,7 @@ class BookAdmin(admin.ModelAdmin):
 
 
 class BorrowLogAdmin(admin.ModelAdmin):
-    list_display = ('book', 'user', 'from_date', 'to_date', 'is_returned')
+    list_display = ('id', 'book', 'user', 'from_date', 'to_date', 'is_returned')
 
 
 admin.site.register(Book, BookAdmin)

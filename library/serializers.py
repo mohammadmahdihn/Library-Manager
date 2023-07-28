@@ -19,6 +19,23 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'author', 'publisher', 'publish_date', 'is_available']
 
 
+class ReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BorrowLog
+        fields = ['id', 'is_returned']
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            instance.is_returned = validated_data['is_returned']
+            instance.save()
+            book = instance.book
+            book.is_available = validated_data['is_returned']
+            book.save()
+        return instance
+
+
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -53,7 +70,6 @@ class BorrowLogSerializer(serializers.ModelSerializer):
     from_date = serializers.ReadOnlyField()
     is_returned = serializers.ReadOnlyField()
 
-
     class Meta:
         model = BorrowLog
         fields = ['id', 'book', 'user', 'from_date', 'to_date', 'is_returned']
@@ -74,3 +90,4 @@ class BorrowLogSerializer(serializers.ModelSerializer):
             book.is_available = False
             book.save()
             return borrow_log
+
