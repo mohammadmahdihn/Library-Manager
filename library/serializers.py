@@ -1,9 +1,10 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
-from .models import Book
+from django.db import transaction
+from .models import Book, BorrowLog
 from django.contrib.auth.models import User
+import datetime
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -44,3 +45,32 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class BorrowLogSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+    from_date = serializers.ReadOnlyField()
+    is_returned = serializers.ReadOnlyField()
+
+
+    class Meta:
+        model = BorrowLog
+        fields = ['id', 'book', 'user', 'from_date', 'to_date', 'is_returned']
+
+    def validate(self, attrs):
+        if not attrs['book'].is_available:
+            raise serializers.ValidationError({'book': 'This book is unavailable'})
+        if datetime.date.today() > attrs['to_date']:
+            raise serializers.ValidationError({'to_date': 'to_date is unavailable'})
+        return attrs
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            borrow_log = BorrowLog.objects.create(user=self.context.get('request', None).user,
+                                                  book=validated_data['book'],
+                                                  to_date=validated_data['to_date'])
+            book = Book.objects.get(id=validated_data['book'].id)
+            book.is_available = False
+            book.save()
+            return borrow_log
