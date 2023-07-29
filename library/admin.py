@@ -3,7 +3,7 @@ from .models import Book, BorrowLog
 
 
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'is_available')
+    list_display = ('name', 'author', 'is_available', 'is_accepted_by_admin')
 
 
 class BorrowLogAdmin(admin.ModelAdmin):

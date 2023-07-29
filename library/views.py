@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListCreateAPIView
 from django.contrib.auth.models import User
 from .serializers import RegisterSerializer, BorrowLogSerializer, ReturnSerializer, BookSerializer
 from .models import BorrowLog, Book
@@ -20,11 +20,12 @@ class BorrowView(CreateAPIView):
 
 
 class ReturnView(RetrieveUpdateAPIView):
+    queryset = BorrowLog.objects.filter(is_returned=False)
     serializer_class = ReturnSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    queryset = BorrowLog.objects.filter(is_returned=False)
 
 
-class BookListView(ListAPIView):
-    queryset = Book.objects.filter(is_available=True)
+class BookListView(ListCreateAPIView):
+    queryset = Book.objects.filter(is_accepted_by_admin=True)
     serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]

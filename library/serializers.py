@@ -14,9 +14,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
+    is_accepted_by_admin = serializers.ReadOnlyField()
+    is_available = serializers.ReadOnlyField()
+
     class Meta:
         model = Book
-        fields = ['id', 'name', 'author', 'publisher', 'publish_date', 'is_available']
+        fields = ['id', 'name', 'author', 'publisher', 'publish_date', 'is_available', 'is_accepted_by_admin']
 
 
 class ReturnSerializer(serializers.ModelSerializer):
@@ -64,7 +67,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class BorrowLogSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
-    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.filter(is_available=True))
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.filter(is_available=True).filter(is_accepted_by_admin=True))
     from_date = serializers.ReadOnlyField()
     is_returned = serializers.ReadOnlyField()
 
