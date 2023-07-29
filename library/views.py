@@ -26,5 +26,5 @@ class ReturnView(RetrieveUpdateAPIView):
 
 
 class BookListView(ListAPIView):
-    queryset = Book.objects.all()
+    queryset = Book.objects.filter(is_available=True)
     serializer_class = BookSerializer

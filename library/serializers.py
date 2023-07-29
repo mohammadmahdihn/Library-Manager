@@ -34,8 +34,6 @@ class ReturnSerializer(serializers.ModelSerializer):
         return instance
 
 
-
-
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -66,7 +64,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class BorrowLogSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
-    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.filter(is_available=True))
     from_date = serializers.ReadOnlyField()
     is_returned = serializers.ReadOnlyField()
 
