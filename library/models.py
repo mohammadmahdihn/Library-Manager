@@ -14,6 +14,7 @@ class Book(models.Model):
     def __str__(self):
         return self.name + ', ' + self.author
 
+
 class BorrowLog(models.Model):
     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

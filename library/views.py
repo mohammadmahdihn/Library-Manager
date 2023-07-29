@@ -1,10 +1,9 @@
-from django.shortcuts import render
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from django.contrib.auth.models import User
-from .serializers import RegisterSerializer, BorrowLogSerializer, ReturnSerializer
+from .serializers import RegisterSerializer, BorrowLogSerializer, ReturnSerializer, BookSerializer
 from .models import BorrowLog, Book
 from rest_framework import permissions
-
+from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
 
@@ -20,9 +19,12 @@ class BorrowView(CreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class ReturnView(UpdateAPIView):
+class ReturnView(RetrieveUpdateAPIView):
     serializer_class = ReturnSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    queryset = BorrowLog.objects.filter(is_returned=False)
 
-    def get_queryset(self):
-        return BorrowLog.objects.filter(user=self.request.user).filter(is_returned=False)
+
+class BookListView(ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
